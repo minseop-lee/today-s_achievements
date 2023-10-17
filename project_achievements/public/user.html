@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>오늘의 업적</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      // 폼 제출 시 실행되는 함수
+      function submitForm(e) {
+        // 기본 동작(페이지 리로드)을 막습니다.
+        e.preventDefault();
+        // 폼 데이터를 가져옵니다.
+        const formData = new FormData(e.target);
+        // 폼 데이터를 객체로 변환합니다.
+        const data = Object.fromEntries(formData.entries());
+
+        // 서버에 업적을 저장하는 요청을 보냅니다.
+        fetch("/insert", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.text())
+          .then((text) => {
+            // 응답을 파싱하여 성공 여부에 따라 알림을 표시합니다.
+            if (JSON.parse(text).ok) {
+              alert("고생했어요.");
+            } else {
+              alert("오류가 발생했습니다. 다시 시도해주세요.");
+            }
+          })
+          .catch((error) => {
+            // 오류 발생 시 콘솔에 오류를 출력합니다.
+            console.error("Error:", error);
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <h1>오늘의 업적 입력</h1>
+    <form onsubmit="submitForm(event)">
+      <fieldset>
+        <legend>과목 선택</legend>
+        <!-- 과목 라디오 버튼과 라벨 -->
+        <input type="radio" id="korean" name="subject" value="국어" checked />
+        <label for="korean">국어</label>
+        <input type="radio" id="math" name="subject" value="수학" />
+        <label for="math">수학</label>
+        <input type="radio" id="english" name="subject" value="영어" />
+        <label for="english">영어</label>
+        <input type="radio" id="science" name="subject" value="과학" />
+        <label for="science">과학</label>
+      </fieldset>
+      <br />
+      <fieldset>
+        <fieldset>
+          <legend for="achievement">
+            업적 (콤마로 구분해서 여러 업적을 한번에 입력할 수 있습니다. 예시 :
+            '밥먹기, 씻기'):
+          </legend>
+          <!-- 업적 입력 텍스트 영역 -->
+          <textarea id="task" name="task" rows="8" cols="100"></textarea>
+        </fieldset>
+      </fieldset>
+      <br />
+      <br />
+
+      <!-- 제출 및 조회 버튼 -->
+      <button type="submit">Save</button>
+      <button onclick="location.href='/list.html'">업적조회</button>
+    </form>
+    <br />
+  </body>
+</html>

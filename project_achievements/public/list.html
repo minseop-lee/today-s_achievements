@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>업적리스트</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      // DOM이 로드된 후 실행되는 코드
+      document.addEventListener("DOMContentLoaded", function () {
+        // 과목 선택 드롭다운 DOM 요소 참조
+        const subjectSelect = document.getElementById("subjectSelect");
+        // 과목 선택 드롭다운 변경 이벤트 리스너
+        subjectSelect.addEventListener("change", function () {
+          // 과목 변경 시 해당 과목의 업적 목록과 업적 정보 갱신
+          fetchTasks(subjectSelect.value);
+          updateAchievementInfo(subjectSelect.value);
+        });
+        // 초기 업적 정보 갱신
+        updateAchievementInfo(subjectSelect.value);
+        // 선택된 과목의 업적 목록을 가져오는 함수
+        function fetchTasks(subject) {
+          // 서버에 선택된 과목의 업적 목록을 요청
+          fetch(`/tasks/${subject}`)
+            .then((response) => response.json())
+            .then((data) => {
+              const results = data.ok ? data.result : [];
+
+              // wrapper DOM 요소 참조
+              const wrapper = document.querySelector(".wrapper");
+              // wrapper 내용 비우기
+              wrapper.innerHTML = "";
+
+              // 결과로 받은 업적 목록을 화면에 표시
+              results.forEach((item) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+
+                const h2 = document.createElement("h2");
+                h2.textContent = item.subject;
+                card.appendChild(h2);
+
+                const p = document.createElement("p");
+                p.textContent = item.task;
+                card.appendChild(p);
+
+                wrapper.appendChild(card);
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
+        // 초기 업적 목록을 가져옴
+        fetchTasks("국어");
+      });
+
+      // 선택된 과목의 업적 정보를 가져오는 함수
+      async function fetchAchievement(subject) {
+        const response = await fetch(`/achievement/${subject}`);
+        if (response.status === 404) {
+          return null;
+        }
+        const data = await response.json();
+        return data;
+      }
+
+      // 선택된 과목의 업적 정보를 화면에 갱신하는 함수
+      async function updateAchievementInfo(subject) {
+        const response = await fetch(`/achievement/${subject}`);
+
+        if (response.status === 404) {
+          alert(`해당 과목(${subject})에 대한 정보를 찾을 수 없습니다.`);
+          return;
+        }
+
+        const achievement = await response.json();
+
+        // 업적 수를 화면에 표시
+        const taskCountElement = document.getElementById("taskCount");
+        taskCountElement.textContent = `업적 수: ${achievement.points}`;
+
+        // 예상 연봉을 화면에 표시
+        const salaryElement = document.getElementById("salary");
+        salaryElement.textContent = `예상연봉: ${achievement.salary}원`;
+      }
+
+      // 초기 과목 설정
+      const initialSubject = "국어";
+      // 초기 업적 목록과 정보를 가져옴
+      fetchTasks(initialSubject);
+      updateAchievementInfo(initialSubject);
+    </script>
+  </head>
+  <body>
+    <div class="top-right">
+      <!-- 오늘의 업적 입력 페이지로 돌아가기 링크 -->
+      <a href="/user.html">오늘의 업적 입력 페이지로 돌아가기</a>
+    </div>
+    <h1>업적리스트</h1>
+    <!-- 과목 선택 드롭다운 및 라벨 -->
+    <label for="subjectSelect">과목 선택:</label>
+    <select id="subjectSelect">
+      <option value="국어">국어</option>
+      <option value="수학">수학</option>
+      <option value="영어">영어</option>
+      <option value="과학">과학</option>
+    </select>
+    <br />
+    <br />
+    <!-- 업적 정보를 표시하는 영역 -->
+    <div id="achievementInfo">
+      <p id="taskCount" class="achievement-count"></p>
+      <p id="salary" class="estimated-salary"></p>
+    </div>
+    <!-- 업적 목록을 표시하는 컨테이너 -->
+    <div class="container">
+      <div class="wrapper"></div>
+      <!-- 오늘의 업적 입력 페이지로 돌아가기 링크 -->
+      <a href="/user.html">오늘의 업적 입력 페이지로 돌아가기</a>
+    </div>
+  </body>
+</html>
